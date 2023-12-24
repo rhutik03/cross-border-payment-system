@@ -252,7 +252,7 @@ async function loginBank(bankadminID, bankID, password) {
     const userPassword = await getPasswordFromBlockchain(bankadminID);
 
     if (password === userPassword) {
-      console.log("Şifre doğrulandı");
+      console.log("Password verified");
       console.log(
         "\n--> Evaluate Transaction: query the bank that was just created"
       );
@@ -260,10 +260,10 @@ async function loginBank(bankadminID, bankID, password) {
       console.log("* Result: Bank: " + prettyJSONString(result.toString()));
       return { success: true };
     } else {
-      throw new Error("Şifre yanlış");
+      throw new Error("Wrong password");
     }
   } catch (error) {
-    console.error(`Şifre doğrulama hatası: ${error}`);
+    console.error(`Password verification error: ${error}`);
     return { success: false, error: error.message };
   }
 }
@@ -289,7 +289,10 @@ async function getPasswordFromBlockchain(UserID) {
       "QueryCustomerPassword",
       UserID
     );
+
     const password = result.toString();
+
+    console.log(password)
 
     gateway.disconnect();
     return password;

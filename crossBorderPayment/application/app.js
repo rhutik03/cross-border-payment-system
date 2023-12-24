@@ -100,12 +100,21 @@ app.post("/signup", async (req, res) => {
         customerSurname
       );
       if (loginResult.success) {
-        console.log("Müşteri oluşturma işlemi tamamlandı.");
+        console.log("Customer creation is complete.");
         req.session.customerID = customerID;
         req.session.customerName = customerName;
         req.session.customerSurname = customerSurname;
         req.session.customerPassword = customerPassword;
-        res.redirect("/customerHome");
+        const customerAccounts = await fetchCustomerAccounts(customerID);
+
+        res.render("customerHome", {
+          customerID:customerID,
+          customerName:customerName,
+          customerSurname:customerSurname,
+          customerPassword:customerPassword,
+          accounts: customerAccounts,
+          message: null
+        });
       } else {
         res.redirect("/createCustomer?error=same_user");
       }
@@ -118,19 +127,29 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-// ============= MUSTERI GIRISI =============== //
+// ============= CUSTOMER LOGIN =============== //
 app.post("/loginCustomer", async (req, res) => {
   const { customerID, customerPassword } = req.body;
+  
   if (!customerID || !customerPassword) {
     return res.status(400).json({ error: "Missing required arguments." });
   }
+
+
   try {
     const loginResult = await login(customerID, customerPassword);
     if (loginResult.success) {
-      console.log("Müşteri giriş işlemi tamamlandı.");
+      console.log("Customer login process is completed.");
       req.session.customerID = customerID;
       req.session.customerPassword = customerPassword;
-      res.redirect("/customerHome");
+      const customerAccounts = await fetchCustomerAccounts(customerID);
+      // res.redirect("/customerHome");
+      res.render("customerHome", {
+        customerID:customerID,
+        customerPassword:customerPassword,
+        accounts:customerAccounts, // Pass the retrieved accounts data
+        message:null
+      });
     } else {
       res.redirect("/createCustomer?error=invalid_credentials");
     }
@@ -141,7 +160,7 @@ app.post("/loginCustomer", async (req, res) => {
   }
 });
 
-// ============== HESAP OLUSTURMA================= //
+// ============== CREATE AN ACCOUNT ================= //
 app.post("/createAccount", async (req, res) => {
   const { customerID, bankID, balance } = req.body;
   try {
@@ -150,8 +169,19 @@ app.post("/createAccount", async (req, res) => {
       const errorMessage = "Your ID is incorrect.";
       res.render("createAccount", { errorMessage });
     } else {
+      const customerName = req.session.customerName;
+      const customerSurname = req.session.customerSurname;
+      const customerPassword = req.session.customerPassword;
+      // console.log(customerID)
+      const customerAccounts = await fetchCustomerAccounts(customerID);
       req.session.customerID = customerID;
-      res.redirect("/showAccounts");
+      res.render("customerHome", {
+        customerID:customerID,
+        customerName:customerName,
+        customerSurname:customerSurname,
+        customerPassword:customerPassword,
+        accounts: customerAccounts,
+      });
     }
   } catch (error) {
     console.error("Error:", error);
@@ -160,22 +190,27 @@ app.post("/createAccount", async (req, res) => {
   }
 });
 
-// ========= MUSTERI ANASAYFASI ======== //
-app.get("/customerHome", (req, res) => {
+// ========= CUSTOMER HOMEPAGE ======== //
+app.get("/customerHome", async (req, res) => {
   const customerID = req.session.customerID;
   const customerName = req.session.customerName;
   const customerSurname = req.session.customerSurname;
   const customerPassword = req.session.customerPassword;
+  console.log(customerID)
+  const customerAccounts = await fetchCustomerAccounts(customerID);
+
   req.session.customerID = customerID;
+
   res.render("customerHome", {
-    customerID,
-    customerName,
-    customerSurname,
-    customerPassword,
+    customerID:customerID,
+    customerName:customerName,
+    customerSurname:customerSurname,
+    customerPassword:customerPassword,
+    accounts: customerAccounts,
   });
 });
 
-// ======= MUSTERI HESAPLARINI GORME ========== //
+// ======= VIEW CUSTOMER ACCOUNTS ========== //
 app.get("/showAccounts", async (req, res) => {
   const customerID = req.session.customerID;
   try {
@@ -192,7 +227,7 @@ app.get("/showAccounts", async (req, res) => {
   }
 });
 
-// ========= MUSTERI PARA TRANSFERI =========== //
+// ========= CUSTOMER MONEY TRANSFER =========== //
 app.post("/transfer", async (req, res) => {
   const customerID = req.session.customerID;
   const senderAccountID = req.body.senderAccountID;
@@ -249,6 +284,7 @@ app.get("/transfer/:accountID", async (req, res) => {
 app.post("/deleteAccount", async (req, res) => {
   const accountID = req.body.accountID;
   const customerID = req.session.customerID;
+  console.log(customerID)
   const confirmation = req.body.confirmation;
   try {
     if (confirmation !== "YES") {
@@ -266,7 +302,23 @@ app.post("/deleteAccount", async (req, res) => {
       req.session.customerID = customerID;
       message = "Delete Process failed.";
     }
-    res.render("customerHome", { message });
+
+    const customerName = req.session.customerName;
+    const customerSurname = req.session.customerSurname;
+    const customerPassword = req.session.customerPassword;
+    console.log(customerID)
+    const customerAccounts = await fetchCustomerAccounts(customerID);
+
+    req.session.customerID = customerID;
+
+    res.render("customerHome", {
+      customerID:customerID,
+      customerName:customerName,
+      customerSurname:customerSurname,
+      customerPassword:customerPassword,
+      accounts: customerAccounts,
+    });
+
   } catch (error) {
     console.error("Error:", error);
     req.session.customerID = customerID;
@@ -278,13 +330,25 @@ app.post("/updateBalance", async (req, res) => {
   const customerID = req.session.customerID;
   const accountID = req.body.accountID;
   const amount = req.body.amount;
+  const customerName = req.session.customerName;
+  const customerSurname = req.session.customerSurname;
+  const customerPassword = req.session.customerPassword;
+  console.log(customerID)
+  const customerAccounts = await fetchCustomerAccounts(customerID);
 
   try {
     await updateBalance(customerID, accountID, amount);
     req.session.customerID = customerID;
 
     const message = "Account balance updated.";
-    res.render("customerHome", { message });
+    res.render("customerHome", {
+      customerID:customerID,
+      customerName:customerName,
+      customerSurname:customerSurname,
+      customerPassword:customerPassword,
+      accounts: customerAccounts,
+      message
+    });
   } catch (error) {
     console.error("Error:", error);
     req.session.customerID = customerID;
@@ -380,7 +444,12 @@ app.post("/loginBank", async (req, res) => {
       req.session.bankID = bankID;
       req.session.bankadminID = bankadminID;
       req.session.password = password;
-      res.redirect("/bankHome");
+      const bankAccounts = await fetchBankAccounts(bankID, bankadminID);
+
+      res.render("bankHome",{    
+        accounts:bankAccounts,
+        bankadminID
+      })
     } else {
       res.redirect("/createBank?error=invalid_credentials");
     }
@@ -390,10 +459,11 @@ app.post("/loginBank", async (req, res) => {
   }
 });
 
-// ========== BANKA ANASAYFASI========== //
-app.get("/bankHome", (req, res) => {
+// ========== BANK HOME PAGE ========== //
+app.get("/bankHome", async (req, res) => {
   const bankID = req.session.bankID;
   const bankadminID = req.session.bankadminID;
+  const bankAccounts = await fetchBankAccounts(bankID, bankadminID);
   const name = req.session.name;
   const password = req.session.password;
   const country = req.session.country;
@@ -407,6 +477,7 @@ app.get("/bankHome", (req, res) => {
     country,
     reserves,
     currency,
+    accounts:bankAccounts
   });
 });
 
@@ -415,6 +486,7 @@ app.get("/showBank", async (req, res) => {
   const bankadminID = req.session.bankadminID;
   try {
     const bank = await fetchBanks(bankID, bankadminID);
+
     req.session.bankadminID = bankadminID;
     req.session.bankID = bankID;
     res.render("showBank", { bank: bank });
@@ -424,7 +496,7 @@ app.get("/showBank", async (req, res) => {
   }
 });
 
-// ============== BANKA HEAPLARI GORME==================== //
+// ==============  VIEW BANK ACCOUNTS ==================== //
 app.get("/showAccountsforBank", async (req, res) => {
   const bankID = req.session.bankID;
   const bankadminID = req.session.bankadminID;
@@ -475,10 +547,6 @@ app.get("/customerDetails/:customerID", async (req, res) => {
   }
 });
 
-app.get("/k6-test", (req, res) => {
-  res.send("K6 testi başarıyla tamamlandı");
-});
-
 app.listen(port, () => {
-  console.log(`Uygulama ${port} portunda çalışıyor.`);
+  console.log(`The application is running on ${port}`);
 });

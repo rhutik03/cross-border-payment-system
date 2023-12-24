@@ -38,11 +38,15 @@ exports.enrollAdmin = async (caClient, wallet, orgMspId) => {
       return;
     }
 
+    // console.log(caClient,"hh") 
+
     // Enroll the admin user, and import the new identity into the wallet.
     const enrollment = await caClient.enroll({
       enrollmentID: adminUserId,
       enrollmentSecret: adminUserPasswd,
     });
+
+    console.log(enrollment) 
     const x509Identity = {
       credentials: {
         certificate: enrollment.certificate,

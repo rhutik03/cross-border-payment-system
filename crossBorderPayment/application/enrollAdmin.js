@@ -18,7 +18,7 @@ async function connectToOrg1CA() {
 
 	const walletPathOrg1 = path.join(__dirname, 'wallet/org1');
 	const walletOrg1 = await buildWallet(Wallets, walletPathOrg1);
-
+	// console.log(caOrg1Client,"h1");
 	await enrollAdmin(caOrg1Client, walletOrg1, mspOrg1);
 
 }
