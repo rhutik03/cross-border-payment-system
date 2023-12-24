@@ -65,50 +65,10 @@ If there are no errors, the explorer interface will be accessible at `http://loc
 ![Bank and Customer LogIn/SignUp Page](demo-images/mainpage.png)
 
 
+8. Creating Banks
 
+![Creating Banks](demo-images/creatingaccnts.png)
+Bank Details
+![Details Bank1](demo-images/bank1details.png)
+![Details Bank2](demo-images/bank2details.png)
 
-
-
-### Stop and Clear Network
-
-1. Navigate to the `cbps-network` directory:
-
-```bash
-cd cbps-network
-```
-
-2. Run the following command to shut down the network:
-
-```bash
-./network.sh down
-```
-
-3. Navigate to the `crossBorderPayment/application` directory:
-
-```bash
-cd ../crossBorderPayment/application
-```
-
-4. Delete the `wallet` and `node-modules` directories:
-
-```bash
-rm -rf wallet
-rm -rf node-modules
-```
-
-Stopping and Removing Docker Containers:
-
-```bash
-docker stop $(docker ps -a -q)
-docker rm -f $(docker ps -aq)
-docker system prune -a
-docker volume prune
-```
-
-Listing Docker Containers and Images:
-
-```bash
-docker ps -a
-docker images -a
-docker volume ls
-```
