@@ -72,3 +72,11 @@ Bank Details
 ![Details Bank1](demo-images/bank1details.png)
 ![Details Bank2](demo-images/bank2details.png)
 
+9. Signing In as customers & Creating Accounts
+![Creating Customer](demo-images/customersignup.png)
+After Creating Accounts
+![Details Bank1](demo-images/creatingaccnts.png)
+
+10. Transfering Money
+![Transfering Money](demo-images/aftertransfer.png)
+
