@@ -80,6 +80,6 @@ After Creating Accounts
 10. Transfering Money
 ![Transfering Money](demo-images/aftertransfer.png)
 ![Accnt 1 details](demo-images/fromaccnt1.png)
-![Accnt 2 details](demo-images/fromaccnt1.png)
+![Accnt 2 details](demo-images/fromaccnt2.png)
 
 
